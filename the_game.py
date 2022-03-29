@@ -89,9 +89,9 @@ def le_jogo(fich):
     a = a[1::] # i removed the 1st thing which again i assume its N so that the positions are alright now
 
     for i in range(N): 
-        for j in range(N):
-            tab[i][j] = a[i][j]
-
+        for j in range(N):		# these for do not work, index out of range, sme thing for the next function, the rest is alright
+            tab[i][j] = a[i][j]		# thei re imcomplete tho
+	
    
 #Grava o estado do jogo num ficheiro
 def garva_jogo():
