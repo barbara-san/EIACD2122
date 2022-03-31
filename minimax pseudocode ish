@@ -1,0 +1,50 @@
+class breath:
+    def __init__(self,estado do jogo, posição em que joga aka min or max pode ser representado por 1 ou 0 eg):
+        self.children = []
+        self.parent = None
+        self.parentAction = None
+    
+    def __str__(self):
+        return current tabuleiro
+
+    def add_child(self,child):
+        self.children.append(child)
+        child.parent = self
+
+    def show_path(self):
+        resposta = [self] #este node é o estado objetivo
+        while self.parent != None:
+            resposta.insert(0, self.parent) #adicionar o estado "parent" à esquerda na lista
+            self = self.parent
+        output = str(resposta[0])
+        for state in resposta[1:]:
+            output += " -%s-> %s" % (state.parentAction, str(state))
+        return output
+
+
+
+def whatthefucktodo(nodeweat, depthwewant, max?):
+	if depth == 0 or node is a terminal node then  
+		return static evaluation of node  
+  
+	if MaximizingPlayer then                                          // for Maximizer Player  
+		maxEva= -infinity                                                 -> find math to do the spooky
+		for each child of node do  
+			eva= whatthefucktodo(childofcurrentnode, depth-1, false)  
+			if eva > maxEva:
+				maxEva = eva                                                    //gives Maximum of the values  
+		return maxEva  
+  
+	else                                                              // for Minimizer player  
+		minEva= +infinity                                                -> find math to do the spooky
+		for each child of node do  
+			eva= minimax(child, depth-1, true)  
+			if eva < minEva:
+				minEva = eva                                                    //gives minimum of the values  
+		return minEva  
+ 
+ 
+ 
+ 
+ 
+ 
