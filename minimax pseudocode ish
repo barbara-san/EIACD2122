@@ -1,5 +1,5 @@
 class breath:
-    def __init__(self,estado do jogo, posição em que joga aka min or max pode ser representado por 1 ou 0 eg):
+    def __init__(self,estado do jogo, posição em que joga aka min or max pode ser representado por 1 ou 0 ig):
         self.children = []
         self.parent = None
         self.parentAction = None
@@ -44,7 +44,38 @@ def whatthefucktodo(nodeweat, depthwewant, max?):
 		return minEva  
  
  
- 
- 
- 
- 
+Minimax is an algorithm for games with more as one player. It searches the states beneath the current one to a current depth.
+This depth is called the ply depth, and the computer "looks ahead" for this many moves.
+
+Minimax tries to maximize the advantage for the current player, while minimizing the advantage for the other player.
+It assumes that the other player does the same.
+
+When it is black's turn, he can choose the best move out of all possible moves. The moves resulting in bad states are therefore not relevant.
+However, when white is moving, it will probably pick the move that is best for him and hence, very bad for black.
+Then the good moves (for black, that is) don't matter as much.
+
+In minimax, all heuristic values of the nodes on a certain ply depth are evaluated.
+These values are then traversed to the top in a particular way: if in this ply it is black's turn, the heuristic values of a node is the maximum of the node's below.
+If white is moving in this ply, the heuristic values of the nodes are the minimum of the node's below.
+
+For all leaves (nodes on the maximum search depth):
+h(n) = h1(n)
+where h1(n) is a certain heuristic function for state n.
+For all nodes where it is black's turn:
+h(n) = MAX(child1, child2, ..., childn)
+For all nodes where it is white's turn:
+h(n) = MIN(child1, child2, ..., childn)
+
+With the functions above, all board states have a heuristic value and the best move can be chosen.
+
+A disadvantage of the minimax algorithm is that each board state has to be visited twice: one time to find its children and a second time to evaluate the heuristic
+value.
+
+Alpha-beta pruning
+Alpha-beta pruning is a optimized form of minimax. It is almost the same, except that it searches the state space in a depth-first search.
+This enables it to cleverly skip parts of the search tree.
+
+For example, it could be that the computer has to calculate the following in order to evaluate a heuristic value for a node:
+MIN(3, MAX(5, a))
+Here the variable a is unknown, but that is not really a problem. MAX(5, a) is at least 5, and MIN(3, b) where b is 5 or more is just 3.
+Alpha-beta pruning thus skips the tree under a.
