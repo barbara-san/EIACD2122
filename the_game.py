@@ -181,5 +181,67 @@ def finaliza():
                        fill="black", text=text)
 
 
-# Indica se (x,y) está dentro do tabuleiro
+# Indica se (x,y) esta dentro do tabuleiro
+def dentro(x,y):
+    if ( x >= 0 and x <= (tabuleiro.N -1) and y >= 0 and y <= (tabuleiro.N -1)):
+        return True 
+    else:
+        return False 
+
+# Indica se mov se verifica entre duas coordenadas adjacentes a 1 ou 2 de distancia
+def adjacente(dist):
+    if(abs(moves.xi - moves.xf) == dist and abs(moves.yi-moves.yf) <= dist) or (abs(moves.yi - moves.yf) == dist and abs(moves.xi - moves.xf) <= dist):
+        return True 
+    else:
+        return False 
+
+#indica se mov e um movimento valido e qual o seu tipo
+def movimeto_valido():
+    if(not(dentro(moves.x1, moves.yi)) or not(dentro(moves.xf, moves.yf))):
+        return False #fora do tabuleiro 
+    
+    if tabuleiro.tab[moves.yi][moves.xi] == moves.player and tabuleiro.tab[moves.yf][moves.xf] == 0 and adjacente(1):
+        moves.tipo = 0
+        return True
+    
+    if tabuleiro.tab[moves.yi][moves.xi] == moves.player and tabuleiro.tab[moves.yf][moves.xf] == 0 and adjacente(2):
+        moves.tipo = 1
+        return True
+    
+    return False
+
+
+def multiplica():
+    for x in range(1):
+        for y in range(1):
+            if tabuleiro.tab[moves.yf + y][moves.xf + x] == otherplayer(moves.player):
+                tabuleiro.tab[moves.yf + y][moves.xf + x] = moves.player 
+
+
+# executa o movimento moves do tipo tipo 
+def executa_moves():
+    tabuleiro.tab[moves.yf][moves.xf] = moves.player 
+    if moves.tipo == 1:
+        tabuleiro.tab[moves.yi][moves.xi] = 0
+        multiplica()
+
+
+def conta_pecas(num):
+    cp = 0
+    for i in range(tabuleiro.N):
+        for j in range(tabuleiro.N):
+            if tabuleiro.tab[i][j] == num:
+                cp += 1
+    return cp
+
+
+def avalia():
+    return (conta_pecas(moves.player) - (conta_pecas(otherplayer(moves.player))))
+
+
+# movimento do Computador - Joga Aleatotio
+def jogada_PC():
+    
+
+
 
