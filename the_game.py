@@ -121,14 +121,12 @@ def read_game(fich):
 # Grava o estado do jogo num ficheiro
 '''def grava_jogo():
      f = open(fich, "r")
-
     if os.stat(fich).st_size == 0:
-        print("Impossivel ler o ficheiro %s") %fich   #verifica se o ficheiro esta vazio ou não
-
-    a = f.readline().split() 
-    N = int(a[0])            
+        # verifica se o ficheiro esta vazio ou não
+        print("Impossivel ler o ficheiro %s") %fich
+    a = f.readline().split()
+    N = int(a[0])
     a = a[1::]
-
     for i in range(N):
         for j in range(N): '''
 
@@ -150,7 +148,7 @@ def inicia_tabu():
 
     '''for i in range(1,7):
         if i > 6:
-            i = 1 
+            i = 1
         fich = "tab"+ i + ".txt"
         read_game(fich)
         mostra_tabul()
@@ -182,32 +180,36 @@ def finaliza():
 
 
 # Indica se (x,y) esta dentro do tabuleiro
-def dentro(x,y):
-    if ( x >= 0 and x <= (tabuleiro.N -1) and y >= 0 and y <= (tabuleiro.N -1)):
-        return True 
+def dentro(x, y):
+    if (x >= 0 and x <= (tabuleiro.N - 1) and y >= 0 and y <= (tabuleiro.N - 1)):
+        return True
     else:
-        return False 
+        return False
 
 # Indica se mov se verifica entre duas coordenadas adjacentes a 1 ou 2 de distancia
+
+
 def adjacente(dist):
     if(abs(moves.xi - moves.xf) == dist and abs(moves.yi-moves.yf) <= dist) or (abs(moves.yi - moves.yf) == dist and abs(moves.xi - moves.xf) <= dist):
-        return True 
+        return True
     else:
-        return False 
+        return False
 
-#indica se mov e um movimento valido e qual o seu tipo
-def movimeto_valido():
-    if(not(dentro(moves.x1, moves.yi)) or not(dentro(moves.xf, moves.yf))):
-        return False #fora do tabuleiro 
-    
+# indica se mov e um movimento valido e qual o seu tipo
+
+
+def movimento_valido():
+    if(not(dentro(moves.xi, moves.yi)) or not(dentro(moves.xf, moves.yf))):
+        return False  # fora do tabuleiro
+
     if tabuleiro.tab[moves.yi][moves.xi] == moves.player and tabuleiro.tab[moves.yf][moves.xf] == 0 and adjacente(1):
         moves.tipo = 0
         return True
-    
+
     if tabuleiro.tab[moves.yi][moves.xi] == moves.player and tabuleiro.tab[moves.yf][moves.xf] == 0 and adjacente(2):
         moves.tipo = 1
         return True
-    
+
     return False
 
 
@@ -215,12 +217,13 @@ def multiplica():
     for x in range(1):
         for y in range(1):
             if tabuleiro.tab[moves.yf + y][moves.xf + x] == otherplayer(moves.player):
-                tabuleiro.tab[moves.yf + y][moves.xf + x] = moves.player 
+                tabuleiro.tab[moves.yf + y][moves.xf + x] = moves.player
 
 
-# executa o movimento moves do tipo tipo 
+# executa o movimento moves do tipo tipo
 def executa_moves():
-    tabuleiro.tab[moves.yf][moves.xf] = moves.player 
+    tabuleiro.tab[moves.yf][moves.xf] = moves.player
+    
     if moves.tipo == 1:
         tabuleiro.tab[moves.yi][moves.xi] = 0
         multiplica()
@@ -241,6 +244,33 @@ def avalia():
 
 # movimento do Computador - Joga Aleatotio
 def jogada_PC():
+    moves.xi = 0
+    moves.yi = 0
+    moves.xf = 0
+    moves.yf = 0
+    moves.player = 0
+    moves.tipo = 0
+
+    bestav = - 1000
+    for yi in range(tabuleiro.N):
+  	    for xi in range(tabuleiro.N):
+  	        for yf in range(tabuleiro.N):
+  		        for xf in range(tabuleiro.N):
+  			        moves.yi = yi, moves.xi = xi, moves.yf = yf, moves.xf = xf
+                    if movimento_valido():
+                        copia()
+                        executa_moves()
+                        av = avalia(moves.player)
+                        if av >= bestav:
+                            bestav = av
+                            bestmov = moves
+                            print("%d %d -> %d %d (%d): %d", moves.yi, moves.xi, moves.yf, moves.xf, moves.tipo, av)
+                            restaurar()
+    executa_moves(bestmov)
+
+
+#determina todas as jogadas validas de um jogador 
+def jogadas_validas():
     
 
 
