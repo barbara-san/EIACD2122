@@ -1,3 +1,67 @@
+def minimax(node, depth, maxplayer):
+	// if depth == 0 or node == terminal_node:
+		// return static evaluation of node  
+	if maxplayer:                                          // for Maximizer Player  
+		maxvalue = -infinity                                                 -> library or use giant number
+		for each child of node: 
+			value = minimax(child, depth-1, false)  
+			if value > maxvalue:
+				maxvalue = value                                                   //gives Maximum of the values  
+		return maxvalue  
+	else                                                              // for Minimizer player  
+		minvalue= +infinity                                                -> library or use giant number
+		for each child of node: 
+			value = minimax(child, depth-1, true)  
+			if value < minvalue:
+				minvalue = value                                                    //gives minimum of the values  
+		return minvalue 
+
+
+def minimax2(node, depth, alpha, beta, maxplayer):                 //beta-alpha pruning
+    // if depth == 0 or node == terminal_node:
+        // return static evaluation of node
+    if maxplayer:
+        value = -infinity    
+        for each child of node:
+            value = max(value, minimax2(child, depth − 1, alpha, beta, false))
+            if value >= beta then
+                break
+            alpha = max(alpha, value)
+        return value
+    else
+        value = +infinity    
+        for each child of node:
+            value = min(value, minimax2(child, depth − 1, alpha, beta, true))
+            if value <= alpha:
+                break
+            beta = min(beta, value)
+        return value
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class breath:
     def __init__(self,estado do jogo, posição em que joga aka min or max pode ser representado por 1 ou 0 ig):
         self.children = []
