@@ -29,7 +29,7 @@ def findBestMove(moves):
         if current move is better than bestMove
             bestMove = current move
     return bestMove
-
+aaa
 
 
 
