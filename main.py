@@ -2,6 +2,7 @@ import sys
 import pygame as py
 import numpy as np
 import random as rd
+import copy as cp
 
 '''CHOOSE GAME MODE ============================================================='''
 
@@ -205,6 +206,7 @@ def skip(player,n):
                     return False
     return True
 
+
 # returns a list of all the possible moves for the piece selected 
 def get_validMoves(playerClicks,player):
     # list of all possible moves in the board:
@@ -222,6 +224,7 @@ def get_validMoves(playerClicks,player):
                     validMoves.append((play,2))
     return validMoves
 
+
 # makes the changes on the board to highlight the possible moves 
 def showPossibleMoves(validMoves,player):
     if player  == 1:
@@ -233,24 +236,27 @@ def showPossibleMoves(validMoves,player):
             tab[validMoves[i][0][0]][validMoves[i][0][1]] = 4
             show_selected(screen, tab, n)
 
-def AIPossibleMoves(player, tab):
+
+# returns a list with all the possible moves for the AI can analyze
+def getAllPossibleMoves(player, tab):
     possibleMoves = [(1, 0), (2, 0), (0, 1), (0, 2), (1, 1), (2, 2), (-1, 0), (-2, 0), (0, -1), (0, -2), (-1, -1), (-2, -2), (-1, 1), (1, -1), (-2, 2), (2, -2)]
-    AIDots = []
-    validMovesAI = []
+    allPieces = []
+    validMoves = []
     for row in range(len(tab)):
         for square in range(len(tab)):
             if tab[row][square] == player:
-                AIDots.append((row, square))
+                allPieces.append((row, square))
     for mov in possibleMoves:
-        for squar in range(len(AIDots)):
-            play = (AIDots[squar][0] + mov[0], AIDots[squar][1] + mov[1])
-            if not(play[0] < 0 or play[0] > (n-1) or play[1] < 0 or play[1] > (n-1)) and tab[AIDots[squar][0]][AIDots[squar][1]]==player:
+        for squar in range(len(allPieces)):
+            play = (allPieces[squar][0] + mov[0], allPieces[squar][1] + mov[1])
+            if not(play[0] < 0 or play[0] > (n-1) or play[1] < 0 or play[1] > (n-1)) and tab[allPieces[squar][0]][allPieces[squar][1]]==player:
                 if tab[int(play[0])][int(play[1])] == 0:
                     if 1 in mov or -1 in mov:
-                        validMovesAI.append((AIDots[squar],play,1))
+                        validMoves.append((allPieces[squar],play,1))
                     elif 2 in mov or -2 in mov:
-                        validMovesAI.append((AIDots[squar],play,2))
-    return validMovesAI
+                        validMoves.append((allPieces[squar],play,2))
+    return validMoves
+
 
 # when a new piece is placed next to another, the old piece takes the colour of the new one
 def next_to():
@@ -268,24 +274,15 @@ def next_to():
                 if tab[x][y] == 1:
                     tab[x][y] = 2
 
-# confirms if the turn of the player matches the piece they want to move and gives all possible moves
-def getAllPossibleMoves():
-    moves = []
-    for i in range(n):
-        for j in range(n):
-            turn = tab[i][j]
-            if (turn == 1 and player == 1) or (turn == 2 and player == 2):
-                moves = get_validMoves(playerClicks)
-    return moves
 
 '''OTHER_DATA ===================================================================='''
 
 # counts each players pieces on the board 
-def count():
+def count(tab):
     nPURPLE = 0
     nGREEN = 0
-    for i in range(n):
-        for j in range(n):
+    for i in range(len(tab)):
+        for j in range(len(tab)):
             if tab[i][j] == 1:
                 nPURPLE += 1
             elif tab[i][j] == 2:
@@ -303,7 +300,7 @@ def checkEnd(tab, player):
     if np.count_nonzero(board == 0) != 0:
         return -1
     else:
-        scores = count()
+        scores = count(tab)
         if scores[0] > scores[1]:
             return 1
         elif scores[0] < scores[1]:
@@ -324,12 +321,52 @@ def end_game(end):
 
 '''AI ======================================================================'''
 
+# returns a random move
 def random(validMovesAI):
     return validMovesAI[rd.randint(0, len(validMovesAI) - 1)]
 
 def boardscore():
-    countt = count()
+    countt = count(tab)
     return countt[0] - countt[1]
+
+
+# returns a score of the board; positive = better for player 1; negative = better for second player
+'''def boardscore(tab):
+    nPURPLE = 0
+    nGREEN = 0
+    for i in range(n):
+        for j in range(n):
+            if (len(tab) - (len(tab)/4 + 1- len(tab)%4) >= i >= len(tab)/4 + 1- len(tab)%4) and (len(tab) - (len(tab)/4 + 1- len(tab)%4) >= i >= len(tab)/4 + 1- len(tab)%4):
+                if tab[i][j] == 1:
+                    nPURPLE += 2
+                elif tab[i][j] == 2:
+                    nGREEN += 2
+            else:
+                if tab[i][j] == 1:
+                    nPURPLE += 1
+                elif tab[i][j] == 2:
+                    nGREEN += 1       
+    return nPURPLE - nGREEN # based on the amount of pieces of each player, the ones closer to the center value more
+
+
+def heuristics(move, player):
+    if player == 1:
+        a = 2
+    elif player == 2:
+        a = 1
+    count = 0
+    around = [(1, 0), (0, 1), (1, 1), (-1, 0), (0, -1), (-1, -1), (-1, 1), (1, -1)]
+    initial = (move[1][0], move[1][1])
+
+    if move[2] == 1:    # if the move type is copy
+        count += 1    
+
+    for piece in around:    # counts the amount of pieces of the opponent around the destination
+        piecenear = (initial[0] + piece[0], initial[1] + piece[1])
+        if not(piecenear[0] < 0 or piecenear[0] > (n-1) or piecenear[1] < 0 or piecenear[1] > (n-1)) and tab[initial[0]][initial[1]]==player and tab[piecenear[0]][piecenear[1]]==a:
+            count += 1     
+    return count
+    '''
 
 def greedy(tab, validMovesAI, gamemode, player):
     if gamemode[0] == 7:
@@ -338,32 +375,28 @@ def greedy(tab, validMovesAI, gamemode, player):
         whoplaying = -1
     maxscore = -10000
     bestmove = None
+    copy = cp.deepcopy(tab)
     for moveAI in validMovesAI:
         AImove = moveAI
         AIpiece = [AImove[0]]
         validMoves = get_validMoves(AIpiece, player)
         move = Move(AImove[0], AImove[1], validMoves, tab)
         makeMove()
-        score = boardscore()
+        a = cp.deepcopy(count(tab))
+        tab = copy
         if (checkEnd(tab, player) == 1 and whoplaying == 1):
             score = 10000
         elif validMoves == [] or checkEnd(tab, player) == 0:
             score = 0
         else:
-            score = boardscore() * whoplaying
+            score = boardscore() * whoplaying #+ heuristics(AImove, player)
         if score > maxscore:
             maxscore = score
             bestmove = AImove
-        tab[int(move.endRow)][int(move.endCol)] = 0
-        if move.type == 2:
-            if player == 1:
-                tab[int(move.startRow)][int(move.startCol)] = 1
-            elif player == 2:
-                tab[int(move.startRow)][int(move.startCol)] = 2
-        player  = otherPlayer()
+    print(a)
     return bestmove
 
-def findBestMove(tab, validMovesAI, player):
+def findBestMove(tab, validMovesAI, player, DEPTH):
     global next_move
     next_move = None
     if player == 1:
@@ -371,28 +404,28 @@ def findBestMove(tab, validMovesAI, player):
     elif player == 2:
         whoplaying = -1
     #random.Shuffle(validMovesAI)
-    minimaxAlphaBeta(tab, validMovesAI, player, 3, -10000, 10000, whoplaying)
+    minimaxAlphaBeta(tab, validMovesAI, player, 5, -10000, 10000, whoplaying, DEPTH)
     return next_move
 
-def minimaxAlphaBeta(tab, validMovesAI, player, depth, alpha, beta, whoplaying):
+def minimaxAlphaBeta(tab, validMovesAI, player, depth, alpha, beta, whoplaying, DEPTH):
     global next_move
     if depth == 0:
-        return whoplaying * boardscore()
+        return whoplaying * (boardscore(tab) + heuristics(AImove))
     max_score = -10000
+    copy = cp.deepcopy(tab)
     for moveAI in validMovesAI:
         AImove = moveAI
         validAI = [AImove[0]]
         validMoves = get_validMoves(validAI, player)
         move = Move(AImove[0], AImove[1], validMoves, tab)
         makeMove()
-        # score = boardscore()
-        next_moves = AIPossibleMoves(player, tab)
-        score = -minimaxAlphaBeta(tab, next_moves, player, depth - 1, -beta, -alpha, -whoplaying)
+        next_moves = getAllPossibleMoves(player, tab)
+        score = -minimaxAlphaBeta(tab, next_moves, player, depth - 1, -beta, -alpha, -whoplaying, DEPTH)
         if score > max_score:
             max_score = score
-            if depth == 3:
+            if depth == DEPTH:
                 next_move = AImove
-        # undoMove()
+        tab = copy
         if max_score > alpha:
             alpha = max_score
         if alpha >= beta:
@@ -401,8 +434,7 @@ def minimaxAlphaBeta(tab, validMovesAI, player, depth, alpha, beta, whoplaying):
 
 '''MAIN =========================================================================='''
 
-gamemode = gameMode() # returns a list end [1, 6]: 1 = player1_human, 2 = player2_human,
-# 6 = random, 7 = greedy, 8 = minimax  
+gamemode = gameMode() # returns a list end [1, 6]: 1 = player1_human, 2 = player2_human, 6 = random, 7 = greedy, 8 = minimax  
 
 # size of the screen and creating a white canvas
 n, tab = choose_tab()
@@ -417,6 +449,10 @@ player = 1
 sq_selected = ()  # no square is selected initially, keeps track of the last click of the user
 playerClicks = []  # keeps track of player clicks ex:[(1,2),(2,2)]
 clickState = False
+if len(tab) <= 8:
+    DEPTH = 4
+else:
+    DEPTH = 3
 
 while running:
     events = py.event.get()
@@ -482,39 +518,39 @@ while running:
                     player  = otherPlayer()
                     
             else: # its AI turn 
-                if gamemode[player -1] == 6:
-                    player  = otherPlayer()
-                    validMovesAI = AIPossibleMoves(player, tab)
+                if gamemode[player -1] == 6: # random moves
+                    validMovesAI = getAllPossibleMoves(player, tab)
                     AImove = random(validMovesAI)
                     AIpiece = [AImove[0]]
                     validMoves = get_validMoves(AIpiece, player)
                     move = Move(AImove[0], AImove[1], validMoves, tab)
                     MOVECOUNT += 1
-
                     makeMove()
                     next_to()
                     end = checkEnd(tab,player)
                     end_game(end)
-                    player  = otherPlayer()                                       # ADD DELAY AFTER PLAY FOR THE AI VS AI MODE
+                    player  = otherPlayer()           # ADD DELAY AFTER PLAY FOR THE AI VS AI MODE
                     
                 elif gamemode[player -1] == 7:
-                    validMovesAI = AIPossibleMoves(player, tab)
+                    validMovesAI = getAllPossibleMoves(player, tab)
+                    copytab = cp.deepcopy(tab)
                     AImove = greedy(tab, validMovesAI, gamemode, player)
+                    tab = copytab
                     AIpiece = [AImove[0]]
                     validMoves = get_validMoves(AIpiece, player)
                     move = Move(AImove[0], AImove[1], validMoves, tab)
                     MOVECOUNT += 1
-
                     makeMove()
                     next_to()
-                    
                     end = checkEnd(tab,player)
                     end_game(end)
                     player  = otherPlayer()
                     
                 elif gamemode[player -1] == 8:
-                    validMovesAI = AIPossibleMoves(player, tab)
-                    AImove = findBestMove(tab, validMovesAI, player)
+                    validMovesAI = getAllPossibleMoves(player, tab)
+                    copytab = cp.deepcopy(tab)
+                    AImove = findBestMove(tab, validMovesAI, player, DEPTH)
+                    tab = copytab
                     AIpiece = [AImove[0]]
                     validMoves = get_validMoves(AIpiece, player)
                     move = Move(AImove[0], AImove[1], validMoves, tab)
@@ -533,4 +569,3 @@ while running:
 
     if end != -1:
         running = False   #if you dont want it to close right after someone wins, just remove this if
-
